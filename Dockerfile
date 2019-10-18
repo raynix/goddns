@@ -14,6 +14,8 @@ ENV CF_API_KEY=xxx \
 
 WORKDIR /app
 COPY --from=builder /app/goddns .
+RUN addgroup -g 2000 golang && \
+  adduser -D -u 2000 -G golang golang
 USER golang
 
 CMD ["/app/goddns"]

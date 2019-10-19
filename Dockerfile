@@ -1,11 +1,13 @@
 FROM golang:1.13.1 AS builder
 
+ENV CGO_ENABLED=0 GOOS=linux
 WORKDIR /app
 COPY . .
+RUN go build -a -installsuffix cgo -o goddns main.go && \
+  addgroup --system --gid 2000 golang && \
+  adduser --system --gid 2000 --uid 2000 golang
 
-RUN go build -o goddns main.go
-
-FROM alpine
+FROM scratch
 
 ENV CF_API_KEY=xxx \
   CF_API_EMAIL=xxx \
@@ -14,8 +16,9 @@ ENV CF_API_KEY=xxx \
 
 WORKDIR /app
 COPY --from=builder /app/goddns .
-RUN addgroup -g 2000 golang && \
-  adduser -D -u 2000 -G golang golang
+COPY --from=builder /etc/passwd /etc/passwd
+COPY --from=builder /etc/group /etc/group
+
 USER golang
 
-CMD ["/app/goddns"]
+ENTRYPOINT ["/app/goddns"]

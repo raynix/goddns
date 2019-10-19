@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: goddns
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: goddns
+  template:
+    metadata:
+      labels:
+        app: goddns
+    spec:
+      containers:
+        - name: goddns
+          image: raynix/goddns:latest
+          env:
+            - name: CF_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: goddns
+                  key: CF_API_KEY
+            - name: CF_API_EMAIL
+              valueFrom:
+                secretKeyRef:
+                  name: goddns
+                  key: CF_API_EMAIL
+            - name: GODDNS_DOMAINS
+              valueFrom:
+                secretKeyRef:
+                  name: goddns
+                  key: GODDNS_DOMAINS
+            - name: DRYRUN
+              value: "false"
+            - name: INTERVAL
+              value: "600"

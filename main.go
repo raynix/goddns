@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 	"strings"
+	"strconv"
 	goddns "github.com/raynix/goddns/pkg/goddns"
 )
 
@@ -13,12 +14,18 @@ func main() {
 	domains := os.Args[1:]
 	domainsEnv := os.Getenv("GODDNS_DOMAINS")
 	dryRun := os.Getenv("DRYRUN") == "true"
+	intervalEnv, err := strconv.Atoi(os.Getenv("INTERVAL"))
+	interval := 300
+	if err == nil {
+		interval = intervalEnv
+	}
 	if len(domainsEnv) > 0 {
 		domains = strings.Split(domainsEnv, ",")
 	}
 	client := goddns.Login()
 	for ;; {
-		time.Sleep(30 * time.Second)
+		log.Printf("Waiting for %v seconds...", interval)
+		time.Sleep(time.Duration(interval) * time.Second)
 		publicIP := goddns.GetPublicIP(goddns.APIipify{})
 		log.Printf("Current public IP is: %v\n", publicIP)
 		for _, domain := range domains{
